@@ -8,19 +8,10 @@ project(first_project)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  nav_msgs
   roscpp
+  rospy
+  std_msgs
 )
-
-add_executable(gps_to_odom src/gps_to_odom.cpp)
-target_link_libraries(gps_to_odom ${catkin_LIBRARIES})
-
-add_executable(odom_to_tf src/odom_to_tf.cpp)
-target_link_libraries(odom_to_tf ${catkin_LIBRARIES})
-
-add_executable(lidar_data_visualization src/lidar_data_visualization.cpp)
-target_link_libraries(lidar_data_visualization ${catkin_LIBRARIES})
-
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -79,7 +70,7 @@ target_link_libraries(lidar_data_visualization ${catkin_LIBRARIES})
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   nav_msgs
+#   std_msgs
 # )
 
 ################################################
@@ -114,7 +105,7 @@ target_link_libraries(lidar_data_visualization ${catkin_LIBRARIES})
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES first_project
-#  CATKIN_DEPENDS nav_msgs roscpp
+#  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 
