@@ -1,0 +1,25 @@
+<launch>
+
+<group ns="gps_to_odom">
+  <node pkg="first_project" type="gps_to_odom" name="gps_to_odom"/>
+  <param name="gps_topic" value="/fix"/>
+  <param name="odom_topic" value="/odom"/>
+</group>
+
+<group ns="lidar_data_visualization"> // edit with correct values inside the tags
+  <node pkg="first_project" type="lidar_data_visualization" name="lidar_data_visualization"/>
+  <param name="lidar_topic" value="/scan"/>
+  <param name="visualization_topic" value="/visualization_marker"/>
+</group>
+
+<group ns="odom_to_tf"> // edit with correct values inside the tags
+  <node pkg="first_project" type="odom_to_tf" name="odom_to_tf"/>
+  <param name="odom_topic" value="/odom"/>
+  <param name="tf_topic" value="/tf"/>
+</group>
+
+<group ns="rviz">
+  <node pkg="rviz" type="rviz" name="rviz"/>
+  <param name="config" value="$(find first_project)/config/rviz_config.rviz"/>
+</group>
+</launch>
