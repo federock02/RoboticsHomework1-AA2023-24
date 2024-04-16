@@ -2,20 +2,28 @@
 
 <group ns="gps_to_odom">
   <node pkg="first_project" type="gps_to_odom" name="gps_to_odom"/>
-  <param name="gps_topic" value="/fix"/>
-  <param name="odom_topic" value="/odom"/>
+    <param name="gps_topic" value="/fix"/>
+    <param name="odom_topic" value="/odom"/>
 </group>
 
-<group ns="lidar_data_visualization"> // edit with correct values inside the tags
-  <node pkg="first_project" type="lidar_data_visualization" name="lidar_data_visualization"/>
-  <param name="lidar_topic" value="/scan"/>
-  <param name="visualization_topic" value="/visualization_marker"/>
+<group ns="lidar_remap"> // edit with correct values inside the tags
+  <node pkg="first_project" type="lidar_remap" name="lidar_remap" output="screen"/>
+    <param name="lidar_topic" value="/scan"/>
+    <param name="visualization_topic" value="/visualization_marker"/>
 </group>
 
-<group ns="odom_to_tf"> // edit with correct values inside the tags
-  <node pkg="first_project" type="odom_to_tf" name="odom_to_tf"/>
-  <param name="odom_topic" value="/odom"/>
-  <param name="tf_topic" value="/tf"/>
+<group ns="odom_to_tf">
+  <node name="odom_to_tf_encoders" pkg="first_project" type="odom_to_tf" output="screen">
+    <param name="root_frame" value="world"/>
+    <param name="child_frame" value="wheel_odom"/>
+    <remap from="input_odom" to="/encoder_odom_topic"/>
+  </node>
+
+  <node name="odom_to_tf_gps" pkg="first_project" type="odom_to_tf" output="screen">
+    <param name="root_frame" value="world"/>
+    <param name="child_frame" value="gps_odom"/>
+    <remap from="input_odom" to="/gps_odom_topic"/>
+  </node>
 </group>
 
 <group ns="rviz">
