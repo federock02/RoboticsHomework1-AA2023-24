@@ -11,7 +11,11 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  nav_msgs
+  tf2_ros
+  tf2_geometry_msgs
   dynamic_reconfigure
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -149,7 +153,11 @@ add_executable(lidar_remap src/lidar_remap.cpp)
 ## same as for the library above
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(lidar_remap ${catkin_LIBRARIES})
+target_link_libraries(
+        gps_to_odom ${catkin_LIBRARIES}
+        odom_to_tf ${catkin_LIBRARIES}
+        lidar_remap ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
