@@ -17,8 +17,6 @@ public:
 
     void odomCallback(const nav_msgs::Odometry::ConstPtr& msg) {
         static tf2_ros::TransformBroadcaster br;
-        tf::Quaternion q;
-        tf::Matrix3x3 mat;
         geometry_msgs::TransformStamped transformStamped;
 
         transformStamped.header.stamp = ros::Time::now();
@@ -32,15 +30,18 @@ public:
             ROS_ERROR("Unknown odometry source!");
             return;
         }
+        transformStamped.setOrigin(tf::Vector3(msg->pose.pose.position.x,
+                                msg->pose.pose.position.y,
+                                msg->pose.pose.position.z));
+        transform.
 
-        transform.setOrigin(tf::Vector3(msg->pose.pose.position.x,
-                                        msg->pose.pose.position.y,
-                                        msg->pose.pose.position.z));
-        mat.setRPY(msg->pose.pose.orientation.x,
-                   msg->pose.pose.orientation.y,
-                   msg->pose.pose.orientation.z);
-        mat.getRotation(q);
-        transform.setRotation(q);
+        // Assuming msg->pose.pose.orientation is a Quaternion
+        
+
+        transformStamped.setRotation(tf::Quaternion q(msg->pose.pose.orientation.x,
+                 msg->pose.pose.orientation.y,
+                 msg->pose.pose.orientation.z,
+                 msg->pose.pose.orientation.w););
 
         br.sendTransform(transformStamped);
     }
