@@ -4,102 +4,43 @@ project(first_project)
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
+## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
-  nav_msgs
-  tf2_ros
-  tf2_geometry_msgs
-  dynamic_reconfigure
-  tf
+        roscpp
+        rospy
+        std_msgs
+        nav_msgs
+        dynamic_reconfigure
+        tf
+        tf2_ros
+        tf2_geometry_msgs
 )
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+## Generate dynamic reconfigure config file
+generate_dynamic_reconfigure_options(
+        cfg/lidar.cfg
+)
 
-################################################
-## Declare ROS messages, services and actions ##
-################################################
-
-## To declare and build messages, services or actions from within this
-## package, follow these steps:
-## * Let MSG_DEP_SET be the set of packages whose message types you use in
-##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
-## * In the file package.xml:
-##   * add a build_depend tag for "message_generation"
-##   * add a build_depend and a exec_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
-##     but can be declared for certainty nonetheless:
-##     * add a exec_depend tag for "message_runtime"
-## * In this file (CMakeLists.txt):
-##   * add "message_generation" and every package in MSG_DEP_SET to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * add "message_runtime" and every package in MSG_DEP_SET to
-##     catkin_package(CATKIN_DEPENDS ...)
-##   * uncomment the add_*_files sections below as needed
-##     and list every .msg/.srv/.action file to be processed
-##   * uncomment the generate_messages entry below
-##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
-
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
-
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
-
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
-
-################################################
-## Declare ROS dynamic reconfigure parameters ##
-################################################
-
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-generate_dynamic_reconfigure_options(cfg/lidar.cfg)
-
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if your package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
+## Declare a catkin package
 catkin_package()
-#  INCLUDE_DIRS include
-#  LIBRARIES first_project
-#  CATKIN_DEPENDS roscpp rospy std_msgs dynamic_reconfigure
-#  DEPENDS system_lib
-
-###########
-## Build ##
-###########
 
 ## Specify additional locations of header files
-include_directories(include ${catkin_INCLUDE_DIRS})
+## Your package locations should be listed before other locations
+include_directories(
+        include
+        ${catkin_INCLUDE_DIRS}
+)
 
-## Declare a C++ executable
+## Declare C++ executables for the nodes
 add_executable(gps_to_odom src/gps_to_odom.cpp)
-target_link_libraries(gps_to_odom ${catkin_LIBRARIES})
-
 add_executable(odom_to_tf src/odom_to_tf.cpp)
-target_link_libraries(odom_to_tf ${catkin_LIBRARIES})
-
 add_executable(lidar_remap src/lidar_remap.cpp)
+
+## Add dependencies and link libraries for each executable
+add_dependencies(gps_to_odom ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(odom_to_tf ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(lidar_remap ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(gps_to_odom ${catkin_LIBRARIES})
+target_link_libraries(odom_to_tf ${catkin_LIBRARIES})
 target_link_libraries(lidar_remap ${catkin_LIBRARIES})
