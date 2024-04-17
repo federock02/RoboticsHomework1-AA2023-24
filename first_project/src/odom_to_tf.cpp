@@ -1,6 +1,5 @@
 #include "ros/ros.h"
 #include "nav_msgs/Odometry.h"
-#include <tf2_ros/transform_broadcaster.h>
 #include <tf/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
 
@@ -18,7 +17,7 @@ public:
     }
 
     void odomCallback(const nav_msgs::Odometry::ConstPtr& msg) {
-        static tf2_ros::TransformBroadcaster br;
+        static tf::TransformBroadcaster br;
         tf::Transform transform;
         std::string child_frame_id;
 
@@ -48,7 +47,6 @@ private:
     ros::Subscriber sub_odom_wheel;
     ros::Subscriber sub_odom_gps;
     std::string root_frame, child_frame;
-    tf::Transform transform;
 };
 
 int main(int argc, char **argv) {
