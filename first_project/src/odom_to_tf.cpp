@@ -19,11 +19,7 @@ public:
 
     void odomCallback(const nav_msgs::Odometry::ConstPtr& msg) {
         static tf2_ros::TransformBroadcaster br;
-        geometry_msgs::Transform transform;
-
-
-        //transformStamped.header.stamp = ros::Time::now();
-        //transformStamped.header.frame_id = root_frame;
+        tf::Transform transform;
         std::string child_frame_id;
 
         if (msg->header.frame_id == "/wheel_odom") {
@@ -37,10 +33,7 @@ public:
         transform.setOrigin(tf::Vector3(msg->pose.pose.position.x,
                                 msg->pose.pose.position.y,
                                 msg->pose.pose.position.z));
-        
-
-        // Assuming msg->pose.pose.orientation is a Quaternion
-        
+     
 
         transform.setRotation(tf::Quaternion(msg->pose.pose.orientation.x,
                  msg->pose.pose.orientation.y,
