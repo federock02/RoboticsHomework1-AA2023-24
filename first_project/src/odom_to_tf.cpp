@@ -2,6 +2,7 @@
 #include "nav_msgs/Odometry.h"
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <tf/transform_datatypes.h> // Include the header file for TF transformations
 
 class OdomToTFConverter {
 public:
@@ -46,8 +47,10 @@ public:
 
 private:
     ros::NodeHandle n;
-    ros::Subscriber sub_odom;
+    ros::Subscriber sub_odom_wheel;
+    ros::Subscriber sub_odom_gps;
     std::string root_frame, child_frame;
+    tf::Transform transform;
 };
 
 int main(int argc, char **argv) {
