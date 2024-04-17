@@ -33,7 +33,7 @@ public:
         transformStamped.setOrigin(tf::Vector3(msg->pose.pose.position.x,
                                 msg->pose.pose.position.y,
                                 msg->pose.pose.position.z));
-        transform.
+        
 
         // Assuming msg->pose.pose.orientation is a Quaternion
         
