@@ -1,7 +1,9 @@
 #include "ros/ros.h"
 #include "nav_msgs/Odometry.h"
 #include <tf2_ros/transform_broadcaster.h>
+#include <tf/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
+
 #include <tf/transform_datatypes.h> // Include the header file for TF transformations
 
 class OdomToTFConverter {
@@ -17,20 +19,22 @@ public:
 
     void odomCallback(const nav_msgs::Odometry::ConstPtr& msg) {
         static tf2_ros::TransformBroadcaster br;
-        geometry_msgs::TransformStamped transformStamped;
+        geometry_msgs::Transform transform;
 
-        transformStamped.header.stamp = ros::Time::now();
-        transformStamped.header.frame_id = root_frame;
+
+        //transformStamped.header.stamp = ros::Time::now();
+        //transformStamped.header.frame_id = root_frame;
+        std::string child_frame_id;
 
         if (msg->header.frame_id == "/wheel_odom") {
-            transformStamped.child_frame_id = "wheel_odom_frame";
+            child_frame_id = "wheel_odom_frame";
         } else if (msg->header.frame_id == "/gps_odom") {
-            transformStamped.child_frame_id = "gps_odom_frame";
+            child_frame_id = "gps_odom_frame";
         } else {
             ROS_ERROR("Unknown odometry source!");
             return;
         }
-        transformStamped.setOrigin(tf::Vector3(msg->pose.pose.position.x,
+        transform.setOrigin(tf::Vector3(msg->pose.pose.position.x,
                                 msg->pose.pose.position.y,
                                 msg->pose.pose.position.z));
         
@@ -38,12 +42,12 @@ public:
         // Assuming msg->pose.pose.orientation is a Quaternion
         
 
-        transformStamped.setRotation(tf::Quaternion q(msg->pose.pose.orientation.x,
+        transform.setRotation(tf::Quaternion(msg->pose.pose.orientation.x,
                  msg->pose.pose.orientation.y,
                  msg->pose.pose.orientation.z,
-                 msg->pose.pose.orientation.w););
+                 msg->pose.pose.orientation.w));
 
-        br.sendTransform(transformStamped);
+        br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), root_frame, child_frame_id));
     }
 
 private:
