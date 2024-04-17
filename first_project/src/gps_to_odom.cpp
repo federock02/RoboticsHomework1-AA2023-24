@@ -1,6 +1,19 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "nav_msgs/Odometry.h"
+#include "math.h"
+
+double lat = 0.0;
+double lon = 0.0;
+double alt = 0.0;
+
+// Extract the latitude, longitude, and altitude values from the NavSatFix message from the /fix topic
+void gpsCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
+{
+    lat = msg->latitude;
+    lon = msg->longitude;
+    alt = msg->altitude;
+}
 
 double computeN(double lat)
 {
@@ -79,14 +92,6 @@ int main(int argc, char const *argv[])
     {
         // 
         nav_msgs::Odometry odom_msg;
-
-        // Extract the latitude, longitude, and altitude values from the NavSatFix message from the /fix topic
-        void gpsCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
-        {
-            double lat = msg->latitude;
-            double lon = msg->longitude;
-            double alt = msg->altitude;
-        }
 
         double[] old_ENU = {0.0, 0.0, 0.0};
 
