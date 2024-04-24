@@ -32,19 +32,16 @@ void computeECEF(double ecef[], double lat, double lon, double alt)
     ROS_INFO("ECEF: x = %f, y = %f, z = %f", x, y, z);
 }
 
-void computeENU(double enu[], double ecef[], double LLA_ref[])
+void computeENU(double enu[], double ecef[], double ecef_ref[])
 {
     // Convert Cartesian ECEF to ENU
     double lat_ref = LLA_ref[0]; // reference latitude
     double lon_ref = LLA_ref[1]; // reference longitude
     double alt_ref = LLA_ref[2]; // reference altitude
 
-    double ecef_r[3];
-    computeECEF(ecef_r, lat_ref, lon_ref, alt_ref);
-
-    double x = ecef[0] - ecef_r[0];
-    double y = ecef[1] - ecef_r[1];
-    double z = ecef[2] - ecef_r[2];
+    double x = ecef[0] - ecef_ref[0];
+    double y = ecef[1] - ecef_ref[1];
+    double z = ecef[2] - ecef_ref[2];
 
     double east = - sin(lon_ref) * x + cos(lon_ref) * y;
     double north = - sin(lat_ref) * cos(lon_ref) * x - sin(lat_ref) * sin(lon_ref) * y + cos(lat_ref) * z;
@@ -114,6 +111,9 @@ int main(int argc, char *argv[])
     lon_r = lon_r * (M_PI/180);
     alt_r = alt_r;
     double LLA_ref[] = {lat_r, lon_r, alt_r};
+    double ecef_r[3];
+    computeECEF(ecef_r, lat_ref, lon_ref, alt_ref);
+    ROS_INFO("ECEF REF: x = %f, y = %f, z = %f", ecef_r[0], ecef_r[1], ecef_r[2])
 
     // loop until ROS is shutdown
     while (ros::ok())
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 
         // Convert Cartesian LLA to ENU
         computeECEF(ecef, lla_rad[0], lla_rad[1], lla_rad[2]);
-        computeENU(enu, ecef, LLA_ref);
+        computeENU(enu, ecef, ecef_r);
 
         // Create and populate the Odometry message
         odom_msg.pose.pose.position.x = enu[0];
