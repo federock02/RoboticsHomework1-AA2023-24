@@ -16,7 +16,7 @@ void gpsCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
     alt = msg->altitude;
 }
 
-void computeECEF(double* ecef, double lat, double lon, double alt)
+void computeECEF(double ecef[], double lat, double lon, double alt)
 {
     double a = 6378137.0; // semi-major axis of the Earth
     double b = 6356752.3; // semi-minor axis of the Earth
@@ -31,7 +31,7 @@ void computeECEF(double* ecef, double lat, double lon, double alt)
     ecef[2] = z;
 }
 
-void computeENU(double* enu, double* ecef, double* LLA_ref)
+void computeENU(double enu[], double ecef[], double LLA_ref[])
 {
     // Convert Cartesian ECEF to ENU
     double lat_ref = LLA_ref[0]; // reference latitude
@@ -53,7 +53,7 @@ void computeENU(double* enu, double* ecef, double* LLA_ref)
     enu[2] = up; 
 }
 
-void computeQuaternion(double* quaternion, double roll, double pitch, double yaw)
+void computeQuaternion(double quaternion[], double roll, double pitch, double yaw)
 {
     double cy = cos(yaw / 2);
     double sy = sin(yaw / 2);
@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
     double lon_r;
     double alt_r;
     double lla_rad[3];
+    double ecef_r[3];
 
     // get reference parameters from launch file
     nh.param("/lat_r", lat_r, 1.0);
@@ -148,6 +149,12 @@ int main(int argc, char *argv[])
         odom_msg.pose.pose.orientation.y = orientation_quaternion[1];
         odom_msg.pose.pose.orientation.z = orientation_quaternion[2];
         odom_msg.pose.pose.orientation.w = orientation_quaternion[3];
+
+        computeECEF(ecef_r, lat_r, lon_r, alt_r);
+
+        odom_msg.twist.twist.linear.x = ecef_r[0];
+        odom_msg.twist.twist.linear.y = ecef_r[1];
+        odom_msg.twist.twist.linear.z = ecef_r[2];
 
         pub.publish(odom_msg);
 
