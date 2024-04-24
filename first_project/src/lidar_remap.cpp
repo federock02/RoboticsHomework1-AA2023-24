@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "nav_msgs/Odometry.h"
+#include "sensor_msgs/PointCloud2.h"
 #include "dynamic_reconfigure/server.h"
 #include "first_project/lidarConfig.h" // Import the generated dynamic configuration file
 
@@ -7,15 +7,15 @@ class LidarRemapNode {
 private:
     static std::string frame; // Frame to which messages should be remapped
     ros::NodeHandle nh;
-    ros::Subscriber odom_sub;
-    ros::Publisher remapped_pub;
+    ros::Subscriber cloud_sub; // Subscriber for PointCloud2 messages
+    ros::Publisher remapped_pub; // Publisher for PointCloud2 messages
     dynamic_reconfigure::Server<first_project::lidarConfig> dyn_reconf_server;
     ros::Timer timer;
 
 public:
     LidarRemapNode() {
-        odom_sub = nh.subscribe("/os_cloud_node/points", 1, &LidarRemapNode::odomCallback, this);
-        remapped_pub = nh.advertise<nav_msgs::Odometry>("/pointcloud_remapped", 1);
+        cloud_sub = nh.subscribe("/os_cloud_node/points", 1, &LidarRemapNode::cloudCallback, this);
+        remapped_pub = nh.advertise<sensor_msgs::PointCloud2>("/pointcloud_remapped", 1);
         dyn_reconf_server.setCallback(boost::bind(&LidarRemapNode::reconfigureCallback, this, _1, _2));
         frame = "wheel_odom"; // Set the default frame
         timer = nh.createTimer(ros::Duration(1.0), &LidarRemapNode::timerCallback, this); // 1 Hz timer
@@ -23,8 +23,8 @@ public:
 
     // This method is called whenever the node receives a message on the /os_cloud_node/points topic.
     // It remaps the frame of the message based on the current value of frame and publishes it on the /pointcloud_remapped topic.
-    void odomCallback(const nav_msgs::OdometryConstPtr& msg) {
-        nav_msgs::Odometry remapped_msg = *msg;
+    void cloudCallback(const sensor_msgs::PointCloud2ConstPtr& msg) {
+        sensor_msgs::PointCloud2 remapped_msg = *msg;
         remapped_msg.header.frame_id = frame;
         remapped_pub.publish(remapped_msg);
     }
@@ -38,7 +38,7 @@ public:
     // This method is called at regular intervals by the timer.
     // It publishes the current value of frame on the /pointcloud_remapped topic.
     void timerCallback(const ros::TimerEvent& event) {
-        nav_msgs::Odometry frame_msg;
+        sensor_msgs::PointCloud2 frame_msg;
         frame_msg.header.frame_id = frame;
         remapped_pub.publish(frame_msg);
     }
