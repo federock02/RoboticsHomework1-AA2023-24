@@ -29,7 +29,6 @@ void computeECEF(double ecef[], double lat, double lon, double alt)
     ecef[0] = x;
     ecef[1] = y;
     ecef[2] = z;
-    ROS_INFO("ECEF: x = %f, y = %f, z = %f", x, y, z);
 }
 
 void computeENU(double enu[], double ecef[], double ecef_ref[])
@@ -112,7 +111,7 @@ int main(int argc, char *argv[])
     alt_r = alt_r;
     double LLA_ref[] = {lat_r, lon_r, alt_r};
     double ecef_r[3];
-    computeECEF(ecef_r, lat_ref, lon_ref, alt_ref);
+    computeECEF(ecef_r, lat_r, lon_ref, alt_ref);
     ROS_INFO("ECEF REF: x = %f, y = %f, z = %f", ecef_r[0], ecef_r[1], ecef_r[2])
 
     // loop until ROS is shutdown
