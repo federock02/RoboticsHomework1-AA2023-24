@@ -10,11 +10,9 @@ class OdomToTFConverter {
 public:
     OdomToTFConverter() {
         sub_odom = n.subscribe("input_odom", 1, &OdomToTFConverter::odomCallback, this);
-        //sub_odom_gps = n.subscribe("/gps_odom", 1000, &OdomToTFConverter::odomCallback, this);
 
         ros::NodeHandle private_nh("~");
-        //private_nh.param<std::string>("root_frame", root_frame, /*"world"*/);
-        //private_nh.param<std::string>("child_frame", child_frame /*, "odom_frame"*/);
+
 
         private_nh.getParam("root_frame", root_frame);
         private_nh.getParam("child_frame", child_frame);
@@ -28,16 +26,6 @@ public:
         tf::Transform transform;
         std::string child_frame_id;
 
-
-
-        /*if (msg->header.frame_id == "wheel_odom") {
-            child_frame_id = "wheel_odom";
-        } else if (msg->header.frame_id == "gps_odom") {
-            child_frame_id = "gps_odom";
-        } else {
-            ROS_ERROR("Unknown odometry source!");
-            return;
-        }*/
         transform.setOrigin(tf::Vector3(msg->pose.pose.position.x,
                                 msg->pose.pose.position.y,
                                 msg->pose.pose.position.z));
@@ -54,7 +42,7 @@ public:
 private:
     ros::NodeHandle n;
     ros::Subscriber sub_odom;
-    //ros::Subscriber sub_odom_gps;
+
     std::string root_frame, child_frame;
 };
 
