@@ -20,15 +20,16 @@ void computeECEF(double* ecef, double lat, double lon, double alt)
 {
     double a = 6378137.0; // semi-major axis of the Earth
     double b = 6356752.3; // semi-minor axis of the Earth
-    double e = sqrt(1 - (b * b) / (a * a)); // eccentricity of the Earth
-    double N = a / sqrt(1 - (e * e) * (sin(lat) * sin(lat))); // prime vertical radius of curvature (distance from the surface to the Z-axis along the ellipsoid normal)
+    double e2 = 1 - ((b * b) / (a * a)); // eccentricity of the Earth
+    double N = a / sqrt(1 - (e2 * (sin(lat) * sin(lat)))); // prime vertical radius of curvature (distance from the surface to the Z-axis along the ellipsoid normal)
     // Convert latitude, longitude, and altitude to Cartesian ECEF
     double x = (N + alt) * cos(lat) * cos(lon);
     double y = (N + alt) * cos(lat) * sin(lon);
-    double z = (N * (1 - e * e) + alt) * sin(lat);
+    double z = (N * (1 - e2) + alt) * sin(lat);
     ecef[0] = x;
     ecef[1] = y;
     ecef[2] = z;
+    ROS_INFO("ECEF: x = %f, y = %f, z = %f", x, y, z);
 }
 
 void computeENU(double* enu, double* ecef, double* LLA_ref)
@@ -45,12 +46,14 @@ void computeENU(double* enu, double* ecef, double* LLA_ref)
     double y = ecef[1] - ecef_r[1];
     double z = ecef[2] - ecef_r[2];
 
-    double east = -sin(lon_ref) * x + cos(lon_ref) * y;
-    double north = -cos(lon_ref) * sin(lat_ref) * x - sin(lat_ref) * sin(lon_ref) * y + cos(lat_ref) * z;
-    double up = cos(lat_ref) * cos(lon_ref) * x + cos(lat_ref) * sin(lon_ref) * y + sin(lat_ref) * z;
+    double east = - sin(lon_ref) * x + cos(lon_ref) * y;
+    double north = - sin(lat_ref) * cos(lon_ref) * x - sin(lat_ref) * sin(lon_ref) * y + cos(lat_ref) * z;
+    // double up = cos(lat_ref) * cos(lon_ref) * x + cos(lat_ref) * sin(lon_ref) * y + sin(lat_ref) * z;
+    double up = 0.0; // keep everything in 2D
     enu[0] = east;
     enu[1] = north;
-    enu[2] = up; 
+    enu[2] = up;
+    ROS_INFO("ENU: east = %f, north = %f, up = %f", east, north, up);
 }
 
 void computeQuaternion(double* quaternion, double roll, double pitch, double yaw)
