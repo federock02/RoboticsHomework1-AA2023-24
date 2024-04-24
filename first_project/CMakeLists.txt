@@ -40,6 +40,7 @@ add_executable(lidar_remap src/lidar_remap.cpp)
 add_dependencies(gps_to_odom ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(odom_to_tf ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(lidar_remap ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(lidar_remap ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(gps_to_odom ${catkin_LIBRARIES})
 target_link_libraries(odom_to_tf ${catkin_LIBRARIES})

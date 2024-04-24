@@ -4,9 +4,9 @@
 #include "sensor_msgs/NavSatFix.h"
 #include "math.h"
 
-double lat = 0.0;
-double lon = 0.0;
-double alt = 0.0;
+double lat;
+double lon;
+double alt;
 
 // Extract the latitude, longitude, and altitude values from the NavSatFix message from the /fix topic
 void gpsCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
@@ -26,29 +26,31 @@ void computeECEF(double* ecef, double lat, double lon, double alt)
     double x = (N + alt) * cos(lat) * cos(lon);
     double y = (N + alt) * cos(lat) * sin(lon);
     double z = (N * (1 - e * e) + alt) * sin(lat);
-    double ecef_1[] = {x, y, z};
-    ecef = ecef_1;
+    ecef[0] = x;
+    ecef[1] = y;
+    ecef[2] = z;
 }
 
 void computeENU(double* enu, double* ecef, double* LLA_ref)
 {
     // Convert Cartesian ECEF to ENU
-    double lat_r = LLA_ref[0]; // reference latitude
-    double lon_r = LLA_ref[1]; // reference longitude
-    double alt_r = LLA_ref[2]; // reference altitude
+    double lat_ref = LLA_ref[0]; // reference latitude
+    double lon_ref = LLA_ref[1]; // reference longitude
+    double alt_ref = LLA_ref[2]; // reference altitude
 
     double ecef_r[3];
-    computeECEF(ecef_r, lat_r, lon_r, alt_r);
+    computeECEF(ecef_r, lat_ref, lon_ref, alt_ref);
 
     double x = ecef[0] - ecef_r[0];
     double y = ecef[1] - ecef_r[1];
     double z = ecef[2] - ecef_r[2];
 
-    double east = -sin(lon_r) * x + cos(lon_r) * y;
-    double north = -cos(lon_r) * sin(lat_r) * x - sin(lat_r) * sin(lon_r) * y + cos(lat_r) * z;
-    double up = cos(lat_r) * cos(lon_r) * x + cos(lat_r) * sin(lon_r) * y + sin(lat_r) * z;
-    double enu_1[] = {east, north, up};
-    enu = enu_1;
+    double east = -sin(lon_ref) * x + cos(lon_ref) * y;
+    double north = -cos(lon_ref) * sin(lat_ref) * x - sin(lat_ref) * sin(lon_ref) * y + cos(lat_ref) * z;
+    double up = cos(lat_ref) * cos(lon_ref) * x + cos(lat_ref) * sin(lon_ref) * y + sin(lat_ref) * z;
+    enu[0] = east;
+    enu[1] = north;
+    enu[2] = up; 
 }
 
 void computeQuaternion(double* quaternion, double roll, double pitch, double yaw)
@@ -65,8 +67,10 @@ void computeQuaternion(double* quaternion, double roll, double pitch, double yaw
     double z = sy * cp * cr - cy * sp * sr;
     double w = cy * cp * cr + sy * sp * sr;
 
-    double quaternion_1[] = {x, y, z, w};
-    quaternion = quaternion_1;
+    quaternion[0] = x;
+    quaternion[1] = y;
+    quaternion[2] = z;
+    quaternion[3] = w;
 }
 
 int main(int argc, char *argv[])
@@ -74,6 +78,7 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "gps_to_odom");
     ros::NodeHandle nh;
 
+    // publish the Odometry message to the /gps_odom topic
     ros::Publisher pub = nh.advertise<nav_msgs::Odometry>("/gps_odom", 1);
     
     // subscribe to the /fix topic from the robotics.bag file
@@ -81,28 +86,43 @@ int main(int argc, char *argv[])
     // from the NavSatFix message
     ros::Subscriber sub = nh.subscribe("/fix", 1, gpsCallback);
 
-    ros::Rate loop_rate(10);
+    // set the loop rate to 1 Hz
+    ros::Rate loop_rate(1);
 
+    double old_enu[] = {0.0, 0.0, 0.0};
+    double ecef[3];
+    double enu[3];
+    double translation[3];
+    double pitch;
+    double yaw;
+    double roll;
+    double orientation_quaternion[4];
+    double lat_r;
+    double lon_r;
+    double alt_r;
+    double lla_rad[3];
+
+    // get reference parameters from launch file
+    nh.param("/lat_r", lat_r, 1.0);
+    nh.param("/lon_r", lon_r, 1.0);
+    nh.param("/alt_r", alt_r, 1.0);
+    lat_r = lat_r * (M_PI/180);
+    lon_r = lon_r * (M_PI/180);
+    alt_r = alt_r;
+    double LLA_ref[] = {lat_r, lon_r, alt_r};
+
+    // loop until ROS is shutdown
     while (ros::ok())
     {
-        // 
+        // create an Odometry message
         nav_msgs::Odometry odom_msg;
-
-        double old_enu[] = {0.0, 0.0, 0.0};
-
-        double lat_r; // reference latitude
-        double lon_r; // reference longitude
-        double alt_r; // reference altitude
-        // get reference parameters from launch file
-        nh.getParam("/first_project/lat_r", lat_r);
-        nh.getParam("/first_project/lon_r", lon_r);
-        nh.getParam("/first_project/alt_r", alt_r);
-        double LLA_ref[] = {lat_r, lon_r, alt_r};
+        
+        lla_rad[0] = lat * (M_PI/180);
+        lla_rad[1] = lon * (M_PI/180);
+        lla_rad[2] = alt;
 
         // Convert Cartesian LLA to ENU
-        double ecef[3];
-        computeECEF(ecef, lat, lon, alt);
-        double enu[3];
+        computeECEF(ecef, lla_rad[0], lla_rad[1], lla_rad[2]);
         computeENU(enu, ecef, LLA_ref);
 
         // Create and populate the Odometry message
@@ -111,14 +131,18 @@ int main(int argc, char *argv[])
         odom_msg.pose.pose.position.z = enu[2];
 
         // Calculate the orientation of the robot in the ENU frame, using consecutive poses estimation
-        double translation[] = {enu[0] - old_enu[0], enu[1] - old_enu[1], enu[2] - old_enu[2]};
-        double pitch = atan2(translation[2], sqrt(translation[0] * translation[0] + translation[1] * translation[1]));
-        double yaw = atan2(translation[1], translation[0]);
-        double roll = 0.0;
+        translation[0] = enu[0] - old_enu[0];
+        translation[1] = enu[1] - old_enu[1];
+        translation[2] = enu[2] - old_enu[2];
+        old_enu[0] = enu[0];
+        old_enu[1] = enu[1];
+        old_enu[2] = enu[2];
+        
+        pitch = atan(translation[2] / translation[1]) * (180/M_PI);
+        yaw = atan(translation[0] / translation[1]) * (180/M_PI);
+        roll = atan(translation[0] / translation[2]) * (180/M_PI);
 
-        double orientation_quaternion[4];
         computeQuaternion(orientation_quaternion, roll, pitch, yaw); 
-
 
         odom_msg.pose.pose.orientation.x = orientation_quaternion[0];
         odom_msg.pose.pose.orientation.y = orientation_quaternion[1];

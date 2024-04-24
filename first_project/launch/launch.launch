@@ -2,9 +2,9 @@
 
 <group ns="gps_to_odom">
   <node pkg="first_project" type="gps_to_odom" name="gps_to_odom"/>
-    <param name="lat_r" value=""/>
-    <param name="lon_r" value=""/>
-    <param name="alt_r" value=""/>
+    <param name="lat_r" value="45.477669461666665"/>
+    <param name="lon_r" value="9.22674018"/>
+    <param name="alt_r" value="169.039"/>
 </group>
 
 <group ns="lidar_remap"> // edit with correct values inside the tags
