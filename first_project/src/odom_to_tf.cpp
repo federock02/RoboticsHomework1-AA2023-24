@@ -24,7 +24,6 @@ public:
     void odomCallback(const nav_msgs::Odometry::ConstPtr& msg) {
         static tf::TransformBroadcaster br;
         tf::Transform transform;
-        std::string child_frame_id;
 
         transform.setOrigin(tf::Vector3(msg->pose.pose.position.x,
                                 msg->pose.pose.position.y,

@@ -14,8 +14,8 @@ private:
 
 public:
     LidarRemapNode() {
-        cloud_sub = nh.subscribe("/os_cloud_node/points", 1, &LidarRemapNode::cloudCallback, this);
-        remapped_pub = nh.advertise<sensor_msgs::PointCloud2>("/pointcloud_remapped", 1);
+        cloud_sub = nh.subscribe("os_cloud_node/points", 1, &LidarRemapNode::cloudCallback, this);
+        remapped_pub = nh.advertise<sensor_msgs::PointCloud2>("pointcloud_remapped", 1);
         dyn_reconf_server.setCallback(boost::bind(&LidarRemapNode::reconfigureCallback, this, _1, _2));
         frame = "wheel_odom"; // Set the default frame
         timer = nh.createTimer(ros::Duration(1.0), &LidarRemapNode::timerCallback, this); // 1 Hz timer
