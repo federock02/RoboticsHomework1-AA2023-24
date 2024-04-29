@@ -22,8 +22,7 @@
     <remap from="input_odom" to="gps_odom"/>
   </node>
 
-  <node pkg="rviz" type="rviz" name="rviz">
-    <param name="config" value="$(find first_project)/config/rviz_config.rviz"/>
-  </node>
+  <node name="rviz" pkg="rviz" type="rviz"/>
+  <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure"/>
 
 </launch>

@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     double orientation_quaternion[4];
     double lla_rad[3];
 
-    // paramethers for the WGS84 ellipsoid
+    // parameters for the WGS84 ellipsoid
     double a = 6378137.0; // semi-major axis of the Earth
     double b = 6356752.3; // semi-minor axis of the Earth
     double e2 = 1 - ((b * b) / (a * a)); // eccentricity of the Earth

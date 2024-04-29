@@ -1,24 +1,22 @@
 #include "ros/ros.h"
-#include "nav_msgs/Odometry.h"
-#include <tf/transform_broadcaster.h>
-#include <geometry_msgs/TransformStamped.h>
 #include "std_msgs/String.h"
-
-#include <tf/transform_datatypes.h> // Include the header file for TF transformations
+#include "nav_msgs/Odometry.h"
+#include "geometry_msgs/TransformStamped.h"
+#include "tf/transform_datatypes.h" // Include the header file for TF transformations
+#include "tf/transform_broadcaster.h"
 
 class OdomToTFConverter {
 public:
     OdomToTFConverter() {
-        sub_odom = n.subscribe("input_odom", 1, &OdomToTFConverter::odomCallback, this);
-
         ros::NodeHandle private_nh("~");
 
-
-        private_nh.getParam("root_frame", root_frame);
         private_nh.getParam("child_frame", child_frame);
+        private_nh.getParam("root_frame", root_frame);
 
         ROS_INFO("CF %s", child_frame.c_str());
         ROS_INFO("RF %s", root_frame.c_str());
+
+        sub_odom = n.subscribe("input_odom", 1, &OdomToTFConverter::odomCallback, this);
     }
 
     void odomCallback(const nav_msgs::Odometry::ConstPtr& msg) {
@@ -41,7 +39,6 @@ public:
 private:
     ros::NodeHandle n;
     ros::Subscriber sub_odom;
-
     std::string root_frame, child_frame;
 };
 
