@@ -7,13 +7,11 @@ add_compile_options(-std=c++11)
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS
         roscpp
-        rospy
+        sensor_msgs
         std_msgs
         nav_msgs
         dynamic_reconfigure
         tf
-        tf2_ros
-        tf2_geometry_msgs
 )
 
 ## Generate dynamic reconfigure config file
@@ -25,7 +23,6 @@ generate_dynamic_reconfigure_options(
 catkin_package()
 
 ## Specify additional locations of header files
-## Your package locations should be listed before other locations
 include_directories(
         include
         ${catkin_INCLUDE_DIRS}

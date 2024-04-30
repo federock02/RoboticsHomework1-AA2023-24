@@ -1,28 +1,24 @@
 <launch>
+  <node name="rviz" pkg="rviz" type="rviz"/>
+  <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure"/>
 
-  <node pkg="first_project" type="gps_to_odom" name="gps_to_odom"/>
-  <param name="lat_r" value="45.477669461666665"/>
-  <param name="lon_r" value="9.22674018"/>
-  <param name="alt_r" value="169.039"/>
-
-  <node pkg="first_project" type="lidar_remap" name="lidar_remap" output="screen">
-    <param name="lidar_topic" value="scan"/>
-    <param name="visualization_topic" value="visualization_marker"/>
+  <node name="gps_to_odom" pkg="first_project" type="gps_to_odom">
+    <param name="lat_r" value="45.477669461666665"/>
+    <param name="lon_r" value="9.22674018"/>
+    <param name="alt_r" value="169.039"/>
   </node>
 
   <node name="odom_to_tf_encoders" pkg="first_project" type="odom_to_tf" output="screen">
     <param name="root_frame" value="world"/>
-    <param name="child_frame" value="wheel_odom"/>
-    <remap from="input_odom" to="wheel_odom"/>
+    <param name="child_frame" value="/wheel_odom"/>
+    <remap from="input_odom" to="/odom"/>
   </node>
 
   <node name="odom_to_tf_gps" pkg="first_project" type="odom_to_tf" output="screen">
     <param name="root_frame" value="world"/>
-    <param name="child_frame" value="gps_odom"/>
-    <remap from="input_odom" to="gps_odom"/>
+    <param name="child_frame" value="/gps_odom"/>
+    <remap from="input_odom" to="/gps_odom"/>
   </node>
 
-  <node name="rviz" pkg="rviz" type="rviz"/>
-  <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure"/>
-
+  <node name="lidar_remap" pkg="first_project" type="lidar_remap" output="screen"/>
 </launch>
