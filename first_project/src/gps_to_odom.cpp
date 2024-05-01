@@ -81,16 +81,20 @@ int main(int argc, char *argv[])
     {
         // create an Odometry message
         nav_msgs::Odometry odom_msg;
+        ROS_INFO("Latitude: %f, Longitude: %f, Altitude: %f", lat, lon, alt);
 
         lla_rad[0] = lat * (M_PI/180);
         lla_rad[1] = lon * (M_PI/180);
         lla_rad[2] = alt;
+        ROS_INFO("Latitude: %f, Longitude: %f, Altitude: %f", lla_rad[0], lla_rad[1], lla_rad[2]);
+
 
         // Convert Cartesian LLA to ENU
         double N = computeN(lla_rad[0], e2, a);
         ecef[0] = (N + lla_rad[2]) * cos(lla_rad[0]) * cos(lla_rad[1]);
         ecef[1] = (N + lla_rad[2]) * cos(lla_rad[0]) * sin(lla_rad[1]);
         ecef[2] = (N * (1 - e2) + lla_rad[2]) * sin(lla_rad[0]);
+        ROS_INFO("ECEF: %f, %f, %f", ecef[0], ecef[1], ecef[2]);
         
         // Convert Cartesian ECEF to ENU
         delta_ECEF[0] = ecef[0] - ecef_r[0];
@@ -99,12 +103,14 @@ int main(int argc, char *argv[])
         enu[0] = - sin(lla_ref_rad[1]) * delta_ECEF[0] + cos(lla_ref_rad[1]) * delta_ECEF[1];
         enu[1] = - sin(lla_ref_rad[0]) * cos(lla_ref_rad[1]) * delta_ECEF[0] - sin(lla_ref_rad[0]) * sin(lla_ref_rad[1]) * delta_ECEF[1] + cos(lla_ref_rad[0]) * delta_ECEF[2];
         enu[2] = cos(lla_ref_rad[0]) * cos(lla_ref_rad[1]) * delta_ECEF[0] + cos(lla_ref_rad[0]) * sin(lla_ref_rad[1]) * delta_ECEF[1] + sin(lla_ref_rad[0]) * delta_ECEF[2];
+        ROS_INFO("ENU: %f, %f, %f", enu[0], enu[1], enu[2]);
 
         // ENU value needs to be shifted by 130 degrees
         double x = cos(shift_angle) * enu[0] - sin(shift_angle) * enu[1];
         double y = sin(shift_angle) * enu[0] + cos(shift_angle) * enu[1];
         enu[0] = x;
         enu[1] = y;
+        ROS_INFO("ENU Shifted: %f, %f, %f", enu[0], enu[1], enu[2]);
 
         // Populate the Odometry message
         odom_msg.pose.pose.position.x = enu[0];
@@ -133,6 +139,7 @@ int main(int argc, char *argv[])
             yaw = atan2(translation[1], translation[0]);
             old_yaw = yaw;
         }
+        ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f", roll, pitch, yaw);
 
         // Convert the Euler angles to a quaternion
         double cr = cos(roll / 2);
@@ -147,6 +154,7 @@ int main(int argc, char *argv[])
         orientation_quaternion[1] = cr * sp * cy + sr * cp * sy;
         orientation_quaternion[2] = cr * cp * sy - sr * sp * cy;
         orientation_quaternion[3] = cr * cp * cy + sr * sp * sy;
+        ROS_INFO("Quaternion: %f, %f, %f, %f", orientation_quaternion[0], orientation_quaternion[1], orientation_quaternion[2], orientation_quaternion[3]);
 
         // Populate the Odometry message
         // odom_msg.pose.pose.orientation.x = orientation_quaternion[0];
