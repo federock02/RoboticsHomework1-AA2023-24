@@ -8,31 +8,33 @@
 class OdomToTFConverter {
 public:
     OdomToTFConverter() {
-        ros::NodeHandle private_nh("~");
 
+        // Get the parameters from the parameter server
+        ros::NodeHandle private_nh("~");
         private_nh.getParam("child_frame", child_frame);
         private_nh.getParam("root_frame", root_frame);
 
-        ROS_INFO("CF %s", child_frame.c_str());
-        ROS_INFO("RF %s", root_frame.c_str());
-
+        // Subscribe to the /input_odom topic
         sub_odom = n.subscribe("input_odom", 1, &OdomToTFConverter::odomCallback, this);
     }
 
+    // Callback function for the /input_odom topic
     void odomCallback(const nav_msgs::Odometry::ConstPtr& msg) {
         static tf::TransformBroadcaster br;
         tf::Transform transform;
 
+        // Set the translation and rotation values for the transform
         transform.setOrigin(tf::Vector3(msg->pose.pose.position.x,
                                 msg->pose.pose.position.y,
                                 msg->pose.pose.position.z));
 
-
+        // Set the rotation values for the transform
         transform.setRotation(tf::Quaternion(msg->pose.pose.orientation.x,
                  msg->pose.pose.orientation.y,
                  msg->pose.pose.orientation.z,
                  msg->pose.pose.orientation.w));
 
+        // Broadcast the transform
         br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), root_frame, child_frame));
     }
 
