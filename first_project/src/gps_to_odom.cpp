@@ -133,7 +133,6 @@ int main(int argc, char *argv[])
             yaw = atan2(translation[1], translation[0]);
             old_yaw = yaw;
         }
-        ROS_INFO("Pitch: %f, Yaw: %f, Roll: %f", pitch, yaw, roll);
 
         // Convert the Euler angles to a quaternion
         double cr = cos(roll / 2);
